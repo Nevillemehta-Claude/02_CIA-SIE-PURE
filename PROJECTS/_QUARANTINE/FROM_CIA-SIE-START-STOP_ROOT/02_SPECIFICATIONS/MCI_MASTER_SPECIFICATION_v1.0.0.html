@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCI Master Specification v1.0.0 | Mission Control Interface</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1a2332;
+            --bg-card: #1e293b;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --border-color: #2d3748;
+            --glow-blue: rgba(59, 130, 246, 0.3);
+            --glow-cyan: rgba(6, 182, 212, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Layout */
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-header .version {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .nav-section {
+            padding: 1rem 0;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.6rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-left-color: var(--accent-cyan);
+        }
+
+        .nav-link.active {
+            background: var(--bg-tertiary);
+            color: var(--accent-cyan);
+            border-left-color: var(--accent-cyan);
+        }
+
+        /* Search */
+        .search-container {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px var(--glow-cyan);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 2rem 3rem;
+            max-width: 1000px;
+        }
+
+        /* Cover Section */
+        .cover {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-radius: 1rem;
+            margin-bottom: 3rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background: var(--accent-red);
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+        }
+
+        .cover h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .cover-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .cover-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .cover-meta-item {
+            text-align: center;
+        }
+
+        .cover-meta-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .cover-meta-value {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        /* Section Styles */
+        .section {
+            margin-bottom: 3rem;
+            scroll-margin-top: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            color: var(--accent-cyan);
+            font-size: 1.2rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: var(--accent-amber);
+            font-size: 1rem;
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--accent-cyan);
+            font-weight: 600;
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:hover td {
+            background: var(--bg-tertiary);
+        }
+
+        /* Info Boxes */
+        .info-box {
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border: 1px solid;
+        }
+
+        .info-box.critical {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--accent-red);
+        }
+
+        .info-box.critical .info-box-title {
+            color: var(--accent-red);
+        }
+
+        .info-box.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: var(--accent-amber);
+        }
+
+        .info-box.warning .info-box-title {
+            color: var(--accent-amber);
+        }
+
+        .info-box.info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--accent-blue);
+        }
+
+        .info-box.info .info-box-title {
+            color: var(--accent-blue);
+        }
+
+        .info-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--accent-green);
+        }
+
+        .info-box.success .info-box-title {
+            color: var(--accent-green);
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Fira Code', 'Monaco', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            color: var(--accent-cyan);
+            margin: 1rem 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Status Badges */
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status.pass { background: var(--accent-green); color: white; }
+        .status.fail { background: var(--accent-red); color: white; }
+        .status.warn { background: var(--accent-amber); color: black; }
+        .status.info { background: var(--accent-blue); color: white; }
+
+        /* Cross-Reference Links */
+        .xref {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            border-bottom: 1px dashed var(--accent-cyan);
+            transition: all 0.2s ease;
+        }
+
+        .xref:hover {
+            color: var(--accent-blue);
+            border-bottom-style: solid;
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+            margin-left: 0;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .checklist li::before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+        }
+
+        .checklist li.checked::before {
+            content: "☑";
+            color: var(--accent-green);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; max-width: 100%; }
+            body { background: white; color: black; }
+            .cover { background: #f5f5f5; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1>MCI Specification</h1>
+                <div class="version">Version 1.0.0 | January 2025</div>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search specification..." id="searchInput">
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Overview</div>
+                <a href="#cover" class="nav-link active">Cover Page</a>
+                <a href="#section-1" class="nav-link">1. Executive Summary</a>
+                <a href="#section-2" class="nav-link">2. System Overview</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Architecture</div>
+                <a href="#section-3" class="nav-link">3. AI Entity Assignment</a>
+                <a href="#section-4" class="nav-link">4. Technology Stack</a>
+                <a href="#section-5" class="nav-link">5. Constitutional Constraints</a>
+                <a href="#section-5a" class="nav-link">5a. CR-005: UXMI Standards</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Functional Spec</div>
+                <a href="#section-5b" class="nav-link">5b. Token Capture Module</a>
+                <a href="#section-6" class="nav-link">6. Pre-Ignition Scanner</a>
+                <a href="#section-7" class="nav-link">7. Ignition Sequence</a>
+                <a href="#section-8" class="nav-link">8. Telemetry Dashboard</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Implementation</div>
+                <a href="#section-9" class="nav-link">9. Development Gates</a>
+                <a href="#section-10" class="nav-link">10. Implementation Prompts</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Appendix</div>
+                <a href="#appendix-a" class="nav-link">A. Traceability Matrix</a>
+                <a href="#appendix-b" class="nav-link">B. Glossary</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Cover Page -->
+            <section id="cover" class="cover">
+                <span class="cover-badge">Confidential</span>
+                <h1>Mission Control Interface</h1>
+                <p class="cover-subtitle">Master Specification Document</p>
+                <div class="cover-meta">
+                    <div class="cover-meta-item">
+                        <div class="cover-meta-label">Version</div>
+                        <div class="cover-meta-value">1.0.0</div>
+                    </div>
+                    <div class="cover-meta-item">
+                        <div class="cover-meta-label">Codename</div>
+                        <div class="cover-meta-value">BACKEND_CONTROL_INTERFACE</div>
+                    </div>
+                    <div class="cover-meta-item">
+                        <div class="cover-meta-label">Status</div>
+                        <div class="cover-meta-value">Phase 3: Architecture</div>
+                    </div>
+                    <div class="cover-meta-item">
+                        <div class="cover-meta-label">Classification</div>
+                        <div class="cover-meta-value">Internal Use Only</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 1: Executive Summary -->
+            <section id="section-1" class="section">
+                <div class="section-header">
+                    <div class="section-number">1</div>
+                    <h2 class="section-title">Executive Summary</h2>
+                </div>
+
+                <h3>1.1 Purpose</h3>
+                <p>The Mission Control Interface (MCI) is an aerospace-inspired operational control panel designed to manage the CIA-SIE-PURE trading backend system. MCI provides a unified interface for system initialization, monitoring, and controlled shutdown operations.</p>
+
+                <div class="info-box critical">
+                    <div class="info-box-title">⚠️ CRITICAL CONSTRAINT</div>
+                    <div class="info-box-content">MCI is a <strong>Decision-Support</strong> system, NOT a Decision-Making system. It provides operational visibility and control mechanisms but has ZERO access to trading signals or position data.</div>
+                </div>
+
+                <h3>1.2 Scope</h3>
+                <ul>
+                    <li><strong>In Scope:</strong> Pre-ignition verification, model selection, ignition sequence, telemetry display, shutdown controls</li>
+                    <li><strong>Out of Scope:</strong> Trading logic, signal generation, position management, order execution</li>
+                </ul>
+
+                <h3>1.3 Key Metrics</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Target</th>
+                                <th>Rationale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Pre-flight scan time</td>
+                                <td>&lt; 500ms</td>
+                                <td>Rapid verification before operations</td>
+                            </tr>
+                            <tr>
+                                <td>UI frame rate</td>
+                                <td>60 fps</td>
+                                <td>Smooth aerospace-grade animations</td>
+                            </tr>
+                            <tr>
+                                <td>Telemetry latency</td>
+                                <td>&lt; 100ms</td>
+                                <td>Near real-time status updates</td>
+                            </tr>
+                            <tr>
+                                <td>System uptime</td>
+                                <td>99.9%</td>
+                                <td>Mission-critical availability</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section 2: System Overview -->
+            <section id="section-2" class="section">
+                <div class="section-header">
+                    <div class="section-number">2</div>
+                    <h2 class="section-title">System Overview</h2>
+                </div>
+
+                <h3>2.1 Architecture Positioning</h3>
+                <p>MCI operates as a <strong>standalone control panel</strong> that interfaces with the CIA-SIE-PURE backend via HTTP/SSE protocols.</p>
+
+                <div class="code-block">
+┌─────────────────────────────────────────────────────────────┐
+│                    HUMAN OPERATOR                            │
+│                         │                                    │
+│                         ▼                                    │
+│  ┌──────────────────────────────────────────┐               │
+│  │         MCI (Port 8080)                   │               │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────────┐ │               │
+│  │  │Pre-Ign  │ │ Model   │ │  Telemetry  │ │               │
+│  │  │Scanner  │ │Selector │ │  Dashboard  │ │               │
+│  │  └────┬────┘ └────┬────┘ └──────┬──────┘ │               │
+│  └───────┼───────────┼─────────────┼────────┘               │
+│          │           │             │                         │
+│          └───────────┼─────────────┘                         │
+│                      ▼                                       │
+│  ┌──────────────────────────────────────────┐               │
+│  │      CIA-SIE-PURE Backend (Port 8000)    │               │
+│  │  [Trading Engine - NO MCI ACCESS]        │               │
+│  └──────────────────────────────────────────┘               │
+└─────────────────────────────────────────────────────────────┘
+                </div>
+
+                <h3>2.2 Communication Protocols</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Protocol</th>
+                                <th>Direction</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>HTTP REST</td>
+                                <td>MCI → CIA-SIE</td>
+                                <td>Control commands (start, stop, configure)</td>
+                            </tr>
+                            <tr>
+                                <td>SSE (Server-Sent Events)</td>
+                                <td>CIA-SIE → MCI</td>
+                                <td>Real-time telemetry streaming</td>
+                            </tr>
+                            <tr>
+                                <td>HTTP REST</td>
+                                <td>MCI → Kite API</td>
+                                <td>Token validation (read-only)</td>
+                            </tr>
+                            <tr>
+                                <td>HTTP REST</td>
+                                <td>MCI → Anthropic</td>
+                                <td>Model availability check</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>2.3 System States</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Description</th>
+                                <th>UI Indicator</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="status info">DORMANT</span></td>
+                                <td>System idle, no active operations</td>
+                                <td>Gray status bar</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status warn">PRE_FLIGHT</span></td>
+                                <td>Running pre-ignition checks</td>
+                                <td>Yellow pulsing indicators</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status pass">READY</span></td>
+                                <td>All checks passed, ignition enabled</td>
+                                <td>Green status, button active</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status info">IGNITION</span></td>
+                                <td>3-second ignition sequence</td>
+                                <td>Blue countdown animation</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status pass">ACTIVE</span></td>
+                                <td>System operational</td>
+                                <td>Cyan glow, live telemetry</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status fail">SHUTDOWN</span></td>
+                                <td>Controlled termination</td>
+                                <td>Red indicators, cooldown</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section 3: AI Entity Assignment -->
+            <section id="section-3" class="section">
+                <div class="section-header">
+                    <div class="section-number">3</div>
+                    <h2 class="section-title">AI Entity Assignment</h2>
+                </div>
+
+                <h3>3.1 Entity Capabilities</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Entity</th>
+                                <th>Strengths</th>
+                                <th>Best For</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Cowork</strong></td>
+                                <td>Document synthesis, architecture diagrams, specifications</td>
+                                <td>Phase 2-4: Requirements, Technology Selection, Architecture</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Claude Code</strong></td>
+                                <td>File system access, shell commands, code generation</td>
+                                <td>Phase 5-7: Implementation, Testing, Deployment</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cursor</strong></td>
+                                <td>Visual IDE, inline suggestions, debugging</td>
+                                <td>Supporting role during implementation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>3.2 Phase Assignment Matrix</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phase</th>
+                                <th>Primary</th>
+                                <th>Supporting</th>
+                                <th>Deliverables</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1. Requirements</td>
+                                <td>Cowork</td>
+                                <td>Claude Web</td>
+                                <td>PRD, user stories</td>
+                            </tr>
+                            <tr>
+                                <td>2. Technology Selection</td>
+                                <td>Cowork</td>
+                                <td>Claude Web</td>
+                                <td>Stack decision matrix</td>
+                            </tr>
+                            <tr>
+                                <td>3. Architecture</td>
+                                <td>Cowork</td>
+                                <td>Claude Web</td>
+                                <td>C4 diagrams, ADRs</td>
+                            </tr>
+                            <tr>
+                                <td>4. UI/UX Design</td>
+                                <td>Cowork</td>
+                                <td>-</td>
+                                <td>Wireframes, design system</td>
+                            </tr>
+                            <tr>
+                                <td>5. Implementation</td>
+                                <td>Claude Code</td>
+                                <td>Cursor</td>
+                                <td>Source code, unit tests</td>
+                            </tr>
+                            <tr>
+                                <td>6. Testing</td>
+                                <td>Claude Code</td>
+                                <td>Cursor</td>
+                                <td>Integration tests, E2E</td>
+                            </tr>
+                            <tr>
+                                <td>7. Deployment</td>
+                                <td>Claude Code</td>
+                                <td>-</td>
+                                <td>CI/CD, documentation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section 4: Technology Stack -->
+            <section id="section-4" class="section">
+                <div class="section-header">
+                    <div class="section-number">4</div>
+                    <h2 class="section-title">Technology Stack</h2>
+                </div>
+
+                <h3>4.1 Mandated Technologies</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Layer</th>
+                                <th>Technology</th>
+                                <th>Version</th>
+                                <th>Rationale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Runtime</td>
+                                <td><strong>Bun</strong></td>
+                                <td>1.0+</td>
+                                <td>Fast startup, native TypeScript</td>
+                            </tr>
+                            <tr>
+                                <td>Backend Framework</td>
+                                <td><strong>Hono</strong></td>
+                                <td>4.0+</td>
+                                <td>Lightweight, Web Standards API</td>
+                            </tr>
+                            <tr>
+                                <td>Frontend Framework</td>
+                                <td><strong>React</strong></td>
+                                <td>18+</td>
+                                <td>Component model, ecosystem</td>
+                            </tr>
+                            <tr>
+                                <td>Styling</td>
+                                <td><strong>Tailwind CSS</strong></td>
+                                <td>3.0+</td>
+                                <td>Utility-first, rapid development</td>
+                            </tr>
+                            <tr>
+                                <td>Real-time</td>
+                                <td><strong>SSE</strong></td>
+                                <td>-</td>
+                                <td>Server-to-client telemetry</td>
+                            </tr>
+                            <tr>
+                                <td>Build Tool</td>
+                                <td><strong>Vite</strong></td>
+                                <td>5.0+</td>
+                                <td>Fast HMR, optimized builds</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>4.2 Seven-Factor Evaluation Summary</h3>
+                <p>TypeScript was selected over Python with a weighted score of <strong>8.80 vs 6.95</strong>.</p>
+
+                <div class="info-box success">
+                    <div class="info-box-title">✓ Decision Rationale</div>
+                    <div class="info-box-content">
+                        MCI is a <strong>frontend-dominant</strong> application requiring real-time UI updates, 60fps animations, and SSE streaming. TypeScript provides type safety, superior tooling, and native browser compatibility. The CIA-SIE backend (Python) operates independently, so language consistency is not required.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Constitutional Constraints -->
+            <section id="section-5" class="section">
+                <div class="section-header">
+                    <div class="section-number">5</div>
+                    <h2 class="section-title">Constitutional Constraints</h2>
+                </div>
+
+                <div class="info-box critical">
+                    <div class="info-box-title">🛡️ INVIOLABLE RULES</div>
+                    <div class="info-box-content">These constraints are hardcoded into MCI and cannot be overridden by configuration, user input, or AI suggestions.</div>
+                </div>
+
+                <h3>CR-001: Decision-Support, NOT Decision-Making</h3>
+                <p>MCI provides operational visibility only. It has <strong>ZERO access</strong> to:</p>
+                <ul>
+                    <li>Trading signals or recommendations</li>
+                    <li>Position data or portfolio values</li>
+                    <li>Order execution capabilities</li>
+                    <li>Risk parameters or limits</li>
+                </ul>
+
+                <h3>CR-002: Expose Contradictions, NEVER Resolve Them</h3>
+                <p>When system states conflict (e.g., backend reports "running" but health check fails), MCI must:</p>
+                <ul>
+                    <li>Display BOTH states to the operator</li>
+                    <li>Highlight the contradiction visually</li>
+                    <li>NEVER auto-resolve or hide the discrepancy</li>
+                    <li>Log the contradiction for audit</li>
+                </ul>
+
+                <h3>CR-003: Descriptive AI, NOT Prescriptive AI</h3>
+                <p>All AI-generated content in MCI must be observational:</p>
+                <ul>
+                    <li>✅ "System memory usage is at 78%"</li>
+                    <li>✅ "Kite token expires in 45 minutes"</li>
+                    <li>❌ "You should restart the system"</li>
+                    <li>❌ "Consider reducing position size"</li>
+                </ul>
+
+                <h3>CR-004: Token Lifecycle Accuracy</h3>
+                <p>Kite Connect tokens expire at <strong>6:00 AM IST daily</strong>. MCI must:</p>
+                <ul>
+                    <li>Display accurate countdown timer</li>
+                    <li>Trigger WARNING at T-60 minutes (yellow)</li>
+                    <li>Trigger CRITICAL at T-30 minutes (red)</li>
+                    <li>Block operations after expiry until refresh</li>
+                </ul>
+
+                <div class="code-block">
+// HARDCODED - Cannot be modified
+const KITE_EXPIRY_HOUR_IST = 6;  // 6:00 AM IST
+const WARNING_THRESHOLD_MS = 60 * 60 * 1000;  // 60 minutes
+const CRITICAL_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
+                </div>
+            </section>
+
+            <!-- Section 5a: CR-005 UXMI Standards -->
+            <section id="section-5a" class="section">
+                <div class="section-header">
+                    <div class="section-number" style="background: linear-gradient(135deg, #8b5cf6, #06b6d4);">5a</div>
+                    <h2 class="section-title">CR-005: User Experience Micro-Interactions (UXMI)</h2>
+                </div>
+
+                <div class="info-box critical">
+                    <div class="info-box-title">🎯 CONSTITUTIONAL REQUIREMENT</div>
+                    <div class="info-box-content">CR-005 establishes that EVERY interactive element must provide immediate, clear, and contextual feedback for ALL possible states. No user action shall go unacknowledged. No wait shall be unexplained. No element shall be ambiguous.</div>
+                </div>
+
+                <h3>5a.1 The Seven States</h3>
+                <p>EVERY interactive element (button, input, link, toggle, tab, card) MUST implement ALL seven states:</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Description</th>
+                                <th>Requirements</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1. Default</strong></td>
+                                <td>Idle state, no interaction</td>
+                                <td>Clear visual affordance that element is interactive</td>
+                            </tr>
+                            <tr>
+                                <td><strong>2. Hover</strong></td>
+                                <td>Mouse cursor over element</td>
+                                <td>Visual highlight + tooltip appears after 300ms</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3. Focus</strong></td>
+                                <td>Keyboard navigation</td>
+                                <td>2px cyan focus ring, visible and distinct from hover</td>
+                            </tr>
+                            <tr>
+                                <td><strong>4. Active</strong></td>
+                                <td>Being clicked/pressed</td>
+                                <td>Immediate visual feedback (&lt; 100ms)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>5. Loading</strong></td>
+                                <td>Action processing</td>
+                                <td>Spinner/progress, element disabled, text changes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>6. Disabled</strong></td>
+                                <td>Not available</td>
+                                <td>Greyed out + tooltip explaining WHY disabled</td>
+                            </tr>
+                            <tr>
+                                <td><strong>7. Success/Error</strong></td>
+                                <td>Action completed</td>
+                                <td>Clear confirmation or error with recovery guidance</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>5a.2 Tooltip Standards</h3>
+                <p>EVERY interactive element MUST have a tooltip that answers: "What will happen if I interact with this?"</p>
+                <ul>
+                    <li><strong>Buttons:</strong> Action description + keyboard shortcut (e.g., "Start ignition sequence (Ctrl+Enter)")</li>
+                    <li><strong>Input fields:</strong> Expected format + validation rules</li>
+                    <li><strong>Icon buttons:</strong> Always have text description (icons alone are ambiguous)</li>
+                    <li><strong>Disabled elements:</strong> Must explain WHY disabled and how to enable</li>
+                    <li><strong>Status indicators:</strong> Detailed status + timestamp</li>
+                </ul>
+                <div class="code-block">
+// Tooltip specifications
+Delay (appear): 300ms
+Delay (disappear): 100ms
+Max width: 280px
+Animation: Fade in 150ms ease-out
+Position: Auto (prefer top, fallback to available space)
+                </div>
+
+                <h3>5a.3 Loading & Progress Indicators</h3>
+                <div class="info-box warning">
+                    <div class="info-box-title">⏱️ THE GOLDEN RULE</div>
+                    <div class="info-box-content">If the user must wait more than 100ms, show something is happening. 100-300ms: subtle indicator. 300ms-1s: spinner. 1s-10s: progress bar with percentage. 10s+: detailed progress with steps + time estimate.</div>
+                </div>
+                <ul>
+                    <li><strong>Inline Spinner:</strong> Button actions, small data fetches (&lt; 3s)</li>
+                    <li><strong>Progress Bar:</strong> Multi-step processes, known duration (1-30s)</li>
+                    <li><strong>Step Indicator:</strong> Sequential phases with timing (like Token Capture)</li>
+                    <li><strong>Skeleton Loader:</strong> Content loading, preserves layout</li>
+                    <li><strong>Full-screen Overlay:</strong> Critical blocking operations</li>
+                </ul>
+
+                <h3>5a.4 Error Message Standards</h3>
+                <p>EVERY error MUST include all three components:</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Purpose</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>WHAT HAPPENED</strong></td>
+                                <td>Clear description of the error</td>
+                                <td>"Token exchange failed"</td>
+                            </tr>
+                            <tr>
+                                <td><strong>WHY</strong></td>
+                                <td>Likely cause explanation</td>
+                                <td>"Request token expired (valid for 60s only)"</td>
+                            </tr>
+                            <tr>
+                                <td><strong>HOW TO FIX</strong></td>
+                                <td>Actionable recovery steps</td>
+                                <td>"Click Try Again and complete login within 60 seconds"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>5a.5 Keyboard Navigation</h3>
+                <p>EVERY function accessible by mouse MUST be accessible by keyboard:</p>
+                <ul>
+                    <li><strong>Tab:</strong> Move to next interactive element</li>
+                    <li><strong>Shift+Tab:</strong> Move to previous element</li>
+                    <li><strong>Enter:</strong> Activate focused button/link</li>
+                    <li><strong>Escape:</strong> Close modals, cancel operations</li>
+                    <li><strong>Arrow keys:</strong> Navigate within components (tabs, menus)</li>
+                </ul>
+
+                <h3>5a.6 Animation Standards</h3>
+                <div class="code-block">
+// Animation timing standards
+Hover effects:        150ms ease-out
+Button press:         100ms ease-in-out
+Focus ring:           150ms ease-out
+Tooltip appear:       150ms ease-out
+Modal open:           200ms ease-out
+Toast slide in:       200ms ease-out
+Progress bar:         300ms linear
+Spinner rotation:     1000ms linear (infinite)
+
+// Motion preference respect
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; }
+}
+                </div>
+
+                <h3>5a.7 UXMI Component Checklist</h3>
+                <p>Every component MUST pass this audit before approval:</p>
+                <ul>
+                    <li>☐ All 7 states implemented and styled</li>
+                    <li>☐ Tooltip with descriptive text</li>
+                    <li>☐ Keyboard navigable (Tab, Enter, Escape)</li>
+                    <li>☐ ARIA labels for accessibility</li>
+                    <li>☐ Loading state with appropriate indicator</li>
+                    <li>☐ Disabled state with explanation tooltip</li>
+                    <li>☐ Error state with WHAT/WHY/HOW</li>
+                    <li>☐ Animations within timing standards</li>
+                    <li>☐ Respects prefers-reduced-motion</li>
+                </ul>
+
+                <p><strong>Reference Document:</strong> ADDENDUM_002_UX_MICRO_INTERACTIONS.md contains the complete 40-page specification.</p>
+            </section>
+
+            <!-- Section 5b: Token Capture Module (Phase 0) -->
+            <section id="section-5b" class="section">
+                <div class="section-header">
+                    <div class="section-number" style="background: linear-gradient(135deg, #ef4444, #f59e0b);">0</div>
+                    <h2 class="section-title">Phase 0: Kite Token Capture Module</h2>
+                </div>
+
+                <div class="info-box critical">
+                    <div class="info-box-title">🔐 MANDATORY PREREQUISITE</div>
+                    <div class="info-box-content">This phase MUST complete before Pre-Ignition Scanner can execute. Kite tokens expire daily at 6:00 AM IST, requiring manual re-authentication each trading day.</div>
+                </div>
+
+                <h3>5b.1 Overview</h3>
+                <p>The Token Capture Module provides a guided workflow for operators to authenticate with Kite Connect. Since Zerodha does not support automated token refresh, MCI must capture the token through a manual copy-paste process with fail-safe guidance.</p>
+
+                <h3>5b.2 Token Lifecycle</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Event</th>
+                                <th>MCI Response</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>6:00 AM IST</td>
+                                <td>Token Expires</td>
+                                <td>Block all operations</td>
+                            </tr>
+                            <tr>
+                                <td>~8:00 AM IST</td>
+                                <td>Operator Opens MCI</td>
+                                <td>Check token status</td>
+                            </tr>
+                            <tr>
+                                <td>If Expired/Missing</td>
+                                <td>Token Required</td>
+                                <td>Display Token Capture Form</td>
+                            </tr>
+                            <tr>
+                                <td>After Authentication</td>
+                                <td>Token Valid</td>
+                                <td>Proceed to Pre-Ignition Scanner</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>5b.3 Token Capture Form</h3>
+                <p>The form displays hardcoded 5-step instructions that are ALWAYS visible (never collapsed):</p>
+                <div class="code-block" style="white-space: pre-wrap;">
+┌─────────────────────────────────────────────────────────────────────┐
+│  ⚠️  KITE AUTHENTICATION REQUIRED                                   │
+│                                                                     │
+│  STEP 1: Copy the Kite Login URL below                             │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ https://kite.zerodha.com/connect/login?v=3&api_key=xxx...   │   │
+│  │                                            [📋 COPY]        │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│  STEP 2: Open Chrome and paste the URL                             │
+│  STEP 3: Login with your Zerodha credentials                       │
+│  STEP 4: Copy the FULL redirect URL from Chrome                    │
+│  STEP 5: Paste the callback URL here                               │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ Paste callback URL here...                                  │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│                    [🚀 AUTHENTICATE TOKEN]                          │
+└─────────────────────────────────────────────────────────────────────┘
+                </div>
+
+                <h3>5b.4 6-Module Processing Architecture</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Module</th>
+                                <th>Name</th>
+                                <th>Purpose</th>
+                                <th>Timing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Status Check</td>
+                                <td>Determine if valid token exists</td>
+                                <td>&lt; 10ms</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Form Display</td>
+                                <td>Render Token Capture Form</td>
+                                <td>User-dependent</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>URL Validation</td>
+                                <td>Parse callback URL, extract request_token</td>
+                                <td>&lt; 50ms</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Token Exchange</td>
+                                <td>Exchange request_token for access_token</td>
+                                <td>500ms - 3s</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Token Storage</td>
+                                <td>Store access_token securely</td>
+                                <td>&lt; 50ms</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>Verification</td>
+                                <td>Verify token with test API call</td>
+                                <td>200ms - 1s</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>5b.5 Progress Indicator</h3>
+                <p>A visual progress indicator shows each module's status during authentication:</p>
+                <ul>
+                    <li>⏳ Pending - Module not yet started</li>
+                    <li>🔄 In Progress - Module executing</li>
+                    <li>✅ Complete - Module succeeded</li>
+                    <li>❌ Failed - Module encountered error</li>
+                </ul>
+
+                <h3>5b.6 Fail-Safe Philosophy</h3>
+                <div class="info-box warning">
+                    <div class="info-box-title">🚀 ROCKET RE-ENTRY PRINCIPLE</div>
+                    <div class="info-box-content">Every module has exactly TWO outcomes: SUCCESS or FAILURE. There is NO partial success. Failure triggers immediate, clear guidance. User is NEVER left in an ambiguous state.</div>
+                </div>
+
+                <h4>Error Recovery Matrix</h4>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Error Type</th>
+                                <th>Message</th>
+                                <th>Recovery Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Invalid URL</td>
+                                <td>"URL format is incorrect"</td>
+                                <td>Return to form, highlight input</td>
+                            </tr>
+                            <tr>
+                                <td>Missing request_token</td>
+                                <td>"URL does not contain token"</td>
+                                <td>Explain what to copy</td>
+                            </tr>
+                            <tr>
+                                <td>Token Expired (60s)</td>
+                                <td>"Request token expired"</td>
+                                <td>Retry quickly emphasized</td>
+                            </tr>
+                            <tr>
+                                <td>Network Error</td>
+                                <td>"Cannot reach Kite servers"</td>
+                                <td>Check connection, retry</td>
+                            </tr>
+                            <tr>
+                                <td>Verification Failed</td>
+                                <td>"Token verification failed"</td>
+                                <td>Restart entire sequence</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>5b.7 Reference Document</h3>
+                <p>Full specification: <strong>ADDENDUM_001_TOKEN_CAPTURE_MODULE.md</strong> in 00_SOURCE_DOCUMENTS/</p>
+            </section>
+
+            <!-- Section 6: Pre-Ignition Scanner -->
+            <section id="section-6" class="section">
+                <div class="section-header">
+                    <div class="section-number">6</div>
+                    <h2 class="section-title">Pre-Ignition Scanner</h2>
+                </div>
+
+                <h3>6.1 Overview</h3>
+                <p>The Pre-Ignition Scanner performs 12 verification checks before the system can transition to READY state. All checks must pass (green) for the ignition button to become active.</p>
+
+                <h3>6.2 Check Specifications</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Check ID</th>
+                                <th>Name</th>
+                                <th>Pass Criteria</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>PORT_8000</td>
+                                <td>Backend Port Availability</td>
+                                <td>Port 8000 responding</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>API_LATENCY</td>
+                                <td>API Response Time</td>
+                                <td>&lt; 500ms response</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>DB_CONN</td>
+                                <td>Database Connection</td>
+                                <td>Connection pool active</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>KITE_VALID</td>
+                                <td>Kite Token Validity</td>
+                                <td>Token not expired</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>KITE_TTL</td>
+                                <td>Token Time-to-Expiry</td>
+                                <td>&gt; 30 minutes remaining</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>ANTHROPIC_KEY</td>
+                                <td>Anthropic API Key</td>
+                                <td>Key present and valid format</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>MODEL_AVAIL</td>
+                                <td>Model Availability</td>
+                                <td>Selected model accessible</td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td>MEM_USAGE</td>
+                                <td>Memory Utilization</td>
+                                <td>&lt; 80% system memory</td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td>DISK_SPACE</td>
+                                <td>Disk Space</td>
+                                <td>&gt; 1GB available</td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td>LOG_ACCESS</td>
+                                <td>Log File Accessibility</td>
+                                <td>Write permissions verified</td>
+                            </tr>
+                            <tr>
+                                <td>11</td>
+                                <td>CONFIG_VALID</td>
+                                <td>Configuration Integrity</td>
+                                <td>Config file parseable</td>
+                            </tr>
+                            <tr>
+                                <td>12</td>
+                                <td>HEARTBEAT</td>
+                                <td>Last Heartbeat</td>
+                                <td>&lt; 30 seconds ago</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>6.3 Performance Requirement</h3>
+                <div class="info-box warning">
+                    <div class="info-box-title">⏱️ TIMING CONSTRAINT</div>
+                    <div class="info-box-content">All 12 checks must complete within <strong>500ms total</strong>. Checks should run in parallel where possible. Individual check timeout: 400ms.</div>
+                </div>
+
+                <h3>6.4 Check Result Interface</h3>
+                <div class="code-block">
+interface CheckResult {
+  id: string;              // e.g., "PORT_8000"
+  name: string;            // Human-readable name
+  status: 'pass' | 'fail' | 'warn';
+  latency_ms: number;      // Execution time
+  details: string;         // Additional context
+  timestamp: number;       // Unix timestamp
+}
+                </div>
+            </section>
+
+            <!-- Section 7: Ignition Sequence -->
+            <section id="section-7" class="section">
+                <div class="section-header">
+                    <div class="section-number">7</div>
+                    <h2 class="section-title">Ignition Sequence</h2>
+                </div>
+
+                <h3>7.1 Pre-conditions</h3>
+                <ul class="checklist">
+                    <li class="checked">All 12 pre-flight checks passing (green)</li>
+                    <li class="checked">Kite token valid with &gt; 30 minutes remaining</li>
+                    <li class="checked">Anthropic model selected</li>
+                    <li class="checked">System state is READY</li>
+                </ul>
+
+                <h3>7.2 Sequence Timeline</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>T+</th>
+                                <th>Action</th>
+                                <th>UI Feedback</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>0.0s</td>
+                                <td>Ignition button pressed</td>
+                                <td>Button locks, countdown starts</td>
+                            </tr>
+                            <tr>
+                                <td>0.0s - 1.0s</td>
+                                <td>Final validation sweep</td>
+                                <td>"VALIDATING" indicator</td>
+                            </tr>
+                            <tr>
+                                <td>1.0s - 2.0s</td>
+                                <td>Backend initialization signal</td>
+                                <td>"INITIALIZING" indicator</td>
+                            </tr>
+                            <tr>
+                                <td>2.0s - 3.0s</td>
+                                <td>Telemetry stream connection</td>
+                                <td>"CONNECTING" indicator</td>
+                            </tr>
+                            <tr>
+                                <td>3.0s</td>
+                                <td>System ACTIVE</td>
+                                <td>Dashboard fully live</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>7.3 Abort Conditions</h3>
+                <p>Ignition will auto-abort if any of these occur during the 3-second sequence:</p>
+                <ul>
+                    <li>Any pre-flight check transitions to FAIL</li>
+                    <li>Backend returns non-200 response</li>
+                    <li>SSE connection fails to establish</li>
+                    <li>User clicks ABORT button</li>
+                </ul>
+            </section>
+
+            <!-- Section 8: Telemetry Dashboard -->
+            <section id="section-8" class="section">
+                <div class="section-header">
+                    <div class="section-number">8</div>
+                    <h2 class="section-title">Telemetry Dashboard</h2>
+                </div>
+
+                <h3>8.1 Dashboard Layout</h3>
+                <div class="code-block">
+┌────────────────────────────────────────────────────────────┐
+│  MISSION CONTROL INTERFACE                    [ACTIVE] 🟢  │
+├────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐ │
+│  │ KITE TOKEN   │  │ UPTIME       │  │ MODEL            │ │
+│  │ 04:23:15     │  │ 02:15:33     │  │ claude-3-opus    │ │
+│  │ ██████░░░░   │  │              │  │ ████████████     │ │
+│  └──────────────┘  └──────────────┘  └──────────────────┘ │
+├────────────────────────────────────────────────────────────┤
+│  TELEMETRY STREAM                                          │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ CPU: 23%  │  MEM: 54%  │  DISK: 12%  │  NET: 2.3MB/s │ │
+│  │ ████░░░░░░│  █████░░░░░│  █░░░░░░░░░░│  ██░░░░░░░░░░ │ │
+│  └──────────────────────────────────────────────────────┘ │
+├────────────────────────────────────────────────────────────┤
+│  [■ EMERGENCY STOP]                    [GRACEFUL SHUTDOWN] │
+└────────────────────────────────────────────────────────────┘
+                </div>
+
+                <h3>8.2 Telemetry Metrics</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Update Frequency</th>
+                                <th>Visualization</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CPU Usage</td>
+                                <td>1 second</td>
+                                <td>Progress bar + percentage</td>
+                            </tr>
+                            <tr>
+                                <td>Memory Usage</td>
+                                <td>1 second</td>
+                                <td>Progress bar + percentage</td>
+                            </tr>
+                            <tr>
+                                <td>Disk Usage</td>
+                                <td>30 seconds</td>
+                                <td>Progress bar + percentage</td>
+                            </tr>
+                            <tr>
+                                <td>Network I/O</td>
+                                <td>1 second</td>
+                                <td>Throughput value</td>
+                            </tr>
+                            <tr>
+                                <td>Kite Token TTL</td>
+                                <td>1 second</td>
+                                <td>Countdown timer</td>
+                            </tr>
+                            <tr>
+                                <td>System Uptime</td>
+                                <td>1 second</td>
+                                <td>HH:MM:SS counter</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>8.3 SSE Event Format</h3>
+                <div class="code-block">
+// SSE Event: telemetry
+event: telemetry
+data: {
+  "timestamp": 1705500000000,
+  "cpu_percent": 23.5,
+  "memory_percent": 54.2,
+  "disk_percent": 12.1,
+  "network_bytes_sec": 2412544,
+  "kite_token_ttl_ms": 15795000,
+  "uptime_ms": 8133000,
+  "state": "ACTIVE"
+}
+                </div>
+            </section>
+
+            <!-- Section 9: Development Gates -->
+            <section id="section-9" class="section">
+                <div class="section-header">
+                    <div class="section-number">9</div>
+                    <h2 class="section-title">Development Gates</h2>
+                </div>
+
+                <h3>9.1 Gate Definitions</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Gate</th>
+                                <th>Name</th>
+                                <th>Entry Criteria</th>
+                                <th>Approver</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="status pass">G1</span></td>
+                                <td>Requirements Approved</td>
+                                <td>PRD signed off, user stories complete</td>
+                                <td>Product Owner</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status pass">G2</span></td>
+                                <td>Architecture Approved</td>
+                                <td>C4 diagrams reviewed, ADRs documented</td>
+                                <td>Tech Lead</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status info">G3</span></td>
+                                <td>Design Approved</td>
+                                <td>Wireframes validated, design system ready</td>
+                                <td>UX Lead</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status info">G4</span></td>
+                                <td>Implementation Ready</td>
+                                <td>Dev environment set up, dependencies locked</td>
+                                <td>Dev Lead</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status info">G5</span></td>
+                                <td>Code Complete</td>
+                                <td>All features implemented, unit tests passing</td>
+                                <td>Dev Lead</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status info">G6</span></td>
+                                <td>Testing Complete</td>
+                                <td>Integration tests, E2E tests, security scan</td>
+                                <td>QA Lead</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status info">G7</span></td>
+                                <td>Release Ready</td>
+                                <td>Documentation complete, deployment tested</td>
+                                <td>Release Manager</td>
+                            </tr>
+                            <tr>
+                                <td><span class="status info">G8</span></td>
+                                <td>Production Live</td>
+                                <td>Deployed, monitoring active, rollback tested</td>
+                                <td>Operations</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section 10: Implementation Prompts -->
+            <section id="section-10" class="section">
+                <div class="section-header">
+                    <div class="section-number">10</div>
+                    <h2 class="section-title">Implementation Prompts</h2>
+                </div>
+
+                <h3>10.1 Claude Code Initialization Prompt</h3>
+                <p>Copy this prompt to initialize the MCI project in Claude Code:</p>
+
+                <div class="code-block" style="white-space: pre-wrap;">
+PROJECT: Mission Control Interface (MCI)
+CODENAME: BACKEND_CONTROL_INTERFACE
+VERSION: 1.0.0
+
+TECHNOLOGY STACK (MANDATORY):
+- Runtime: Bun 1.0+
+- Backend Framework: Hono 4.0+
+- Frontend: React 18+ with Tailwind CSS
+- Build: Vite
+- Real-time: Server-Sent Events (SSE)
+- Port: 8080
+
+DIRECTORY STRUCTURE:
+mci/
+├── src/
+│   ├── server/
+│   │   ├── index.ts
+│   │   ├── routes/
+│   │   │   ├── auth.ts         # NEW: Token Capture API (/api/auth/*)
+│   │   │   ├── health.ts
+│   │   │   ├── ignition.ts
+│   │   │   └── telemetry.ts
+│   │   └── services/
+│   │       ├── scanner.ts
+│   │       ├── kite.ts         # Token Capture 6-Module Processing
+│   │       └── anthropic.ts
+│   ├── client/
+│   │   ├── App.tsx
+│   │   ├── components/
+│   │   │   └── TokenCaptureForm.tsx  # NEW: Phase 0 UI Component
+│   │   └── hooks/
+│   └── shared/
+│       └── types.ts
+├── package.json
+└── tsconfig.json
+
+CONSTITUTIONAL CONSTRAINTS (INVIOLABLE):
+- CR-001: ZERO access to trading signals
+- CR-002: Expose contradictions, NEVER resolve
+- CR-003: Descriptive AI only
+- CR-004: Kite token expires 6 AM IST
+
+FIRST TASK:
+1. Initialize the project
+2. Build Token Capture Module (Phase 0) with 6-module architecture
+3. Build Pre-Ignition Scanner with 12 checks completing in < 500ms total
+
+PHASE 0 REQUIREMENTS (Token Capture):
+- Token Capture Form with 5-step hardcoded instructions
+- 6-Module Processing: Status Check → Form Display → URL Validation →
+  Token Exchange → Token Storage → Verification
+- Progress indicator with ⏳🔄✅❌ status icons
+- Fail-safe mechanism with clear error recovery guidance
+- Reference: ADDENDUM_001_TOKEN_CAPTURE_MODULE.md
+                </div>
+
+                <h3>10.2 Cursor Supporting Prompt</h3>
+                <p>Use this when working in Cursor IDE alongside Claude Code:</p>
+
+                <div class="code-block" style="white-space: pre-wrap;">
+CONTEXT: Working on MCI (Mission Control Interface)
+STACK: Bun + Hono + React + Tailwind
+STYLE: Aerospace dark theme (#0a0e17 background)
+
+CONSTRAINTS:
+- 60fps UI animations required
+- SSE for real-time telemetry
+- TypeScript strict mode
+- No trading signal access (CR-001)
+
+CURRENT FILE: [specify file]
+TASK: [specify task]
+                </div>
+            </section>
+
+            <!-- Appendix A: Traceability Matrix -->
+            <section id="appendix-a" class="section">
+                <div class="section-header">
+                    <div class="section-number">A</div>
+                    <h2 class="section-title">Traceability Matrix</h2>
+                </div>
+
+                <p>Maps requirements to specifications to implementation components.</p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Requirement</th>
+                                <th>Specification</th>
+                                <th>Component</th>
+                                <th>Test</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>REQ-001: Pre-flight verification</td>
+                                <td><a href="#section-6" class="xref">Section 6</a></td>
+                                <td>scanner.ts</td>
+                                <td>scanner.test.ts</td>
+                            </tr>
+                            <tr>
+                                <td>REQ-002: Model selection</td>
+                                <td><a href="#section-6" class="xref">Section 6.2 #6-7</a></td>
+                                <td>anthropic.ts</td>
+                                <td>anthropic.test.ts</td>
+                            </tr>
+                            <tr>
+                                <td>REQ-003: Ignition sequence</td>
+                                <td><a href="#section-7" class="xref">Section 7</a></td>
+                                <td>ignition.ts</td>
+                                <td>ignition.test.ts</td>
+                            </tr>
+                            <tr>
+                                <td>REQ-004: Live telemetry</td>
+                                <td><a href="#section-8" class="xref">Section 8</a></td>
+                                <td>telemetry.ts</td>
+                                <td>telemetry.test.ts</td>
+                            </tr>
+                            <tr>
+                                <td>REQ-005: Token countdown</td>
+                                <td><a href="#section-5" class="xref">CR-004</a></td>
+                                <td>kite.ts</td>
+                                <td>kite.test.ts</td>
+                            </tr>
+                            <tr>
+                                <td>REQ-006: Emergency shutdown</td>
+                                <td><a href="#section-8" class="xref">Section 8.1</a></td>
+                                <td>shutdown.ts</td>
+                                <td>shutdown.test.ts</td>
+                            </tr>
+                            <tr>
+                                <td>CONST-001: No trading access</td>
+                                <td><a href="#section-5" class="xref">CR-001</a></td>
+                                <td>middleware/guard.ts</td>
+                                <td>guard.test.ts</td>
+                            </tr>
+                            <tr>
+                                <td>CONST-002: Expose contradictions</td>
+                                <td><a href="#section-5" class="xref">CR-002</a></td>
+                                <td>state/conflicts.ts</td>
+                                <td>conflicts.test.ts</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Appendix B: Glossary -->
+            <section id="appendix-b" class="section">
+                <div class="section-header">
+                    <div class="section-number">B</div>
+                    <h2 class="section-title">Glossary</h2>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Term</th>
+                                <th>Definition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>MCI</strong></td>
+                                <td>Mission Control Interface - the control panel application</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CIA-SIE-PURE</strong></td>
+                                <td>The trading backend system that MCI manages</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pre-Ignition</strong></td>
+                                <td>Verification phase before system activation</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ignition</strong></td>
+                                <td>3-second startup sequence for the backend</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Telemetry</strong></td>
+                                <td>Real-time system metrics streamed via SSE</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Kite Connect</strong></td>
+                                <td>Zerodha's broker API for trading operations</td>
+                            </tr>
+                            <tr>
+                                <td><strong>SSE</strong></td>
+                                <td>Server-Sent Events - one-way real-time protocol</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Constitutional Constraint</strong></td>
+                                <td>Inviolable rule that cannot be overridden</td>
+                            </tr>
+                            <tr>
+                                <td><strong>C4 Diagram</strong></td>
+                                <td>Context, Container, Component, Code architecture diagrams</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ADR</strong></td>
+                                <td>Architecture Decision Record</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p><strong>MCI Master Specification v1.0.0</strong></p>
+                <p>Generated: January 2025 | Classification: Internal Use Only</p>
+                <p>Reference: PROJECT_BRIEF_BCI_001.md | TECHNOLOGY_SELECTION_LIFECYCLE_SPECIFICATION.md</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const sections = document.querySelectorAll('.section');
+
+            sections.forEach(section => {
+                const text = section.textContent.toLowerCase();
+                if (query === '' || text.includes(query)) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        });
+
+        // Active navigation link
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.section, .cover');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
