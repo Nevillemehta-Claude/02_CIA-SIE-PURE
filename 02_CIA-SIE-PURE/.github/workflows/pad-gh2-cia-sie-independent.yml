@@ -16,15 +16,16 @@ on:
   push:
     branches: [main, master]
     paths:
-      - '06_SOURCE_CODE/**'
-      - '07_TESTING/**'
-      - 'pyproject.toml'
+      - 'PROJECTS/CIA_SIE_PURE/06_SOURCE_CODE/**'
+      - 'PROJECTS/CIA_SIE_PURE/07_TESTING/**'
+      - 'PROJECTS/CIA_SIE_PURE/pyproject.toml'
   pull_request:
     branches: [main, master]
 
 env:
   PYTHON_VERSION: '3.11'
-  PYTHONPATH: './06_SOURCE_CODE/src'
+  APP_DIR: 'PROJECTS/CIA_SIE_PURE'
+  PYTHONPATH: './PROJECTS/CIA_SIE_PURE/06_SOURCE_CODE/src'
   CV_THRESHOLD: '15'  # Maximum acceptable CV percentage
 
 jobs:
@@ -170,7 +171,7 @@ jobs:
           echo "=== BASELINE TEST EXECUTION ==="
           START_TIME=$(date +%s)
           
-          cd 07_TESTING
+          cd ${{ env.APP_DIR }}/07_TESTING
           PYTHONPATH="../06_SOURCE_CODE/src" python -m pytest tests/ \
             -v --tb=short -ra \
             --junitxml=../baseline-results.xml \
@@ -240,7 +241,7 @@ jobs:
       - name: Setup CI Database Path
         run: |
           mkdir -p /tmp/cia_sie
-          mkdir -p cycle-results
+          mkdir -p ${{ env.APP_DIR }}/cycle-results
           echo "CIA_SIE_DB_PATH=/tmp/cia_sie/cia_sie.db" >> $GITHUB_ENV
           echo "SQLITE_DB_PATH=/tmp/cia_sie/cia_sie.db" >> $GITHUB_ENV
           echo "DATABASE_URL=sqlite+aiosqlite:///tmp/cia_sie/cia_sie.db" >> $GITHUB_ENV
@@ -251,7 +252,7 @@ jobs:
           echo "=== EXECUTING 20 DETERMINISM CYCLES ==="
           CYCLES=${{ inputs.cycles || '20' }}
           
-          WORKDIR=$(pwd)
+          WORKDIR=$(pwd)/${{ env.APP_DIR }}
           mkdir -p "$WORKDIR/cycle-results"
           DURATIONS=""
           PASSED_COUNTS=""
@@ -305,7 +306,7 @@ jobs:
           echo "=== VARIANCE ANALYSIS ==="
           
           # Read durations
-          DURATIONS=$(cat cycle-results/durations.txt)
+          DURATIONS=$(cat ${{ env.APP_DIR }}/cycle-results/durations.txt)
           
           # Calculate statistics using Python
           python3 << 'EOF'
@@ -332,7 +333,7 @@ jobs:
           print(f"Coefficient of Variation: {cv:.2f}%")
           
           # Check for flakiness (any cycle with different pass count)
-          passed_str = open('cycle-results/passed-counts.txt').read()
+          passed_str = open('${{ env.APP_DIR }}/cycle-results/passed-counts.txt').read()
           passed_counts = [int(x) for x in passed_str.split() if x]
           unique_counts = set(passed_counts)
           flaky = len(unique_counts) > 1
@@ -353,7 +354,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: determinism-cycle-results
-          path: cycle-results/
+          path: ${{ env.APP_DIR }}/cycle-results/
 
       - name: Fail on Flakiness or High Variance
         run: |
@@ -422,9 +423,9 @@ jobs:
             VERDICT="FAIL"
           fi
           
-          mkdir -p 00_GOVERNANCE
+          mkdir -p ${{ env.APP_DIR }}/00_GOVERNANCE
           
-          cat > 00_GOVERNANCE/GH_CIA_SIE_PURE_INDEPENDENT_CERTIFICATION_REPORT.md << EOF
+          cat > ${{ env.APP_DIR }}/00_GOVERNANCE/GH_CIA_SIE_PURE_INDEPENDENT_CERTIFICATION_REPORT.md << EOF
           # CIA-SIE-PURE INDEPENDENT CERTIFICATION REPORT
           
           **Authority:** PAD-GH2 Phase I — GitHub Independent Verification
@@ -510,7 +511,7 @@ jobs:
           ALL_PASSED="${{ needs.determinism-cycles.outputs.all-passed }}"
           FLAKY="${{ needs.determinism-cycles.outputs.flaky-detected }}"
           
-          cat > 00_GOVERNANCE/GH_CIA_SIE_PURE_DETERMINISM_AND_VARIANCE_REPORT.md << EOF
+          cat > ${{ env.APP_DIR }}/00_GOVERNANCE/GH_CIA_SIE_PURE_DETERMINISM_AND_VARIANCE_REPORT.md << EOF
           # CIA-SIE-PURE DETERMINISM AND VARIANCE REPORT
           
           **Authority:** PAD-GH2 Phase I — GitHub Independent Verification
@@ -572,14 +573,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cia-sie-certification-reports
-          path: 00_GOVERNANCE/GH_*.md
+          path: ${{ env.APP_DIR }}/00_GOVERNANCE/GH_*.md
 
       - name: Commit Reports to Repository
         if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add 00_GOVERNANCE/GH_*.md
+          git add ${{ env.APP_DIR }}/00_GOVERNANCE/GH_*.md
           git diff --staged --quiet || git commit -m "PAD-GH2: CIA-SIE-PURE Independent Certification Reports [skip ci]"
           git push || echo "Could not push (may be protected branch)"
 
