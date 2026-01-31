@@ -16,16 +16,16 @@ on:
   push:
     branches: [main, master]
     paths:
-      - 'PROJECTS/CIA_SIE_PURE/06_SOURCE_CODE/**'
-      - 'PROJECTS/CIA_SIE_PURE/07_TESTING/**'
-      - 'PROJECTS/CIA_SIE_PURE/pyproject.toml'
+      - '02_CIA-SIE-PURE/PROJECTS/CIA_SIE_PURE/06_SOURCE_CODE/**'
+      - '02_CIA-SIE-PURE/PROJECTS/CIA_SIE_PURE/07_TESTING/**'
+      - '02_CIA-SIE-PURE/PROJECTS/CIA_SIE_PURE/pyproject.toml'
   pull_request:
     branches: [main, master]
 
 env:
   PYTHON_VERSION: '3.11'
-  APP_DIR: 'PROJECTS/CIA_SIE_PURE'
-  PYTHONPATH: './PROJECTS/CIA_SIE_PURE/06_SOURCE_CODE/src'
+  APP_DIR: '02_CIA-SIE-PURE/PROJECTS/CIA_SIE_PURE'
+  PYTHONPATH: './02_CIA-SIE-PURE/PROJECTS/CIA_SIE_PURE/06_SOURCE_CODE/src'
   CV_THRESHOLD: '15'  # Maximum acceptable CV percentage
 
 jobs:
